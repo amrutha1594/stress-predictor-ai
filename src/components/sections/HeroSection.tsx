@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const HeroSection = () => {
   const handleScrollToAbout = () => {
-    document.querySelector("#about")?.scrollIntoView({ behavior: "smooth" });
+     document.querySelector("#analyze")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -108,7 +108,7 @@ const HeroSection = () => {
               onClick={handleScrollToAbout}
               className="gradient-hero text-primary-foreground px-8 py-6 text-lg font-semibold shadow-glow hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
-              Explore Project
+             Analyze Your Portfolio
               <ArrowDown className="w-5 h-5 ml-2 animate-bounce" />
             </Button>
           </motion.div>

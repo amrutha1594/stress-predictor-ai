@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      portfolio_analyses: {
+        Row: {
+          analysis_summary: string | null
+          created_at: string
+          emotional_tone: Json | null
+          engagement_patterns: Json | null
+          file_content: string
+          file_name: string
+          id: string
+          performance_trends: Json | null
+          stress_causes: Json | null
+          stress_level: Database["public"]["Enums"]["stress_level"]
+          stress_score: number | null
+          stress_tips: Json | null
+          student_name: string | null
+          study_schedule: Json | null
+          updated_at: string
+          workload_indicators: Json | null
+        }
+        Insert: {
+          analysis_summary?: string | null
+          created_at?: string
+          emotional_tone?: Json | null
+          engagement_patterns?: Json | null
+          file_content: string
+          file_name: string
+          id?: string
+          performance_trends?: Json | null
+          stress_causes?: Json | null
+          stress_level?: Database["public"]["Enums"]["stress_level"]
+          stress_score?: number | null
+          stress_tips?: Json | null
+          student_name?: string | null
+          study_schedule?: Json | null
+          updated_at?: string
+          workload_indicators?: Json | null
+        }
+        Update: {
+          analysis_summary?: string | null
+          created_at?: string
+          emotional_tone?: Json | null
+          engagement_patterns?: Json | null
+          file_content?: string
+          file_name?: string
+          id?: string
+          performance_trends?: Json | null
+          stress_causes?: Json | null
+          stress_level?: Database["public"]["Enums"]["stress_level"]
+          stress_score?: number | null
+          stress_tips?: Json | null
+          student_name?: string | null
+          study_schedule?: Json | null
+          updated_at?: string
+          workload_indicators?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +79,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      stress_level: "low" | "moderate" | "high"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +206,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      stress_level: ["low", "moderate", "high"],
+    },
   },
 } as const
