@@ -6,7 +6,7 @@ import AboutSection from "@/components/sections/AboutSection";
 import MethodologySection from "@/components/sections/MethodologySection";
 import ToolsSection from "@/components/sections/ToolsSection";
 import StressLevelsSection from "@/components/sections/StressLevelsSection";
-import TeamSection from "@/components/sections/TeamSection";
+
 
 const Index = () => {
   return (
@@ -19,7 +19,7 @@ const Index = () => {
         <MethodologySection />
         <ToolsSection />
         <StressLevelsSection />
-        <TeamSection />
+        
       </main>
       <Footer />
     </div>
