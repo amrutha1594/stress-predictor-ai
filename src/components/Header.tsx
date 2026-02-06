@@ -10,7 +10,7 @@ const navLinks = [
   { href: "#methodology", label: "Methodology" },
   { href: "#tools", label: "Tools" },
   { href: "#stress-levels", label: "Stress Levels" },
-  { href: "#team", label: "Team" },
+  
 ];
 
 const Header = () => {
