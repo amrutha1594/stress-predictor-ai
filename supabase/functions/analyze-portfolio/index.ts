@@ -113,29 +113,37 @@
        );
      }
  
-     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-     if (!LOVABLE_API_KEY) {
-       throw new Error("LOVABLE_API_KEY is not configured");
-     }
- 
-     // Call Lovable AI Gateway for analysis
-     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-       method: "POST",
-       headers: {
-         Authorization: `Bearer ${LOVABLE_API_KEY}`,
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify({
-         model: "google/gemini-3-flash-preview",
-         messages: [
-           { role: "system", content: STRESS_ANALYSIS_PROMPT },
-           { 
-             role: "user", 
-             content: `Please analyze the following student portfolio content:\n\nStudent Name: ${studentName || "Anonymous"}\nFile Name: ${fileName}\n\nContent:\n${fileContent}` 
-           },
-         ],
-       }),
-     });
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) {
+        throw new Error("LOVABLE_API_KEY is not configured");
+      }
+
+      // Truncate content to avoid exceeding token limits (~4 chars per token, limit to ~200k tokens worth)
+      const MAX_CONTENT_CHARS = 500000;
+      const truncatedContent = fileContent.length > MAX_CONTENT_CHARS
+        ? fileContent.substring(0, MAX_CONTENT_CHARS) + "\n\n[Content truncated due to length...]"
+        : fileContent;
+
+      console.log(`Processing file: ${fileName}, content length: ${fileContent.length}, truncated to: ${truncatedContent.length}`);
+
+      // Call Lovable AI Gateway for analysis
+      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: STRESS_ANALYSIS_PROMPT },
+            { 
+              role: "user", 
+              content: `Please analyze the following student portfolio content:\n\nStudent Name: ${studentName || "Anonymous"}\nFile Name: ${fileName}\n\nContent:\n${truncatedContent}` 
+            },
+          ],
+        }),
+      });
  
      if (!aiResponse.ok) {
        if (aiResponse.status === 429) {

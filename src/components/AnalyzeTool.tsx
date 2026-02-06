@@ -109,41 +109,41 @@
      }
    };
  
-   const extractTextContent = async (file: File): Promise<string> => {
-     // For text files, read directly
-     if (file.type === "text/plain" || file.name.endsWith(".txt")) {
-       return await file.text();
-     }
-     
-     // For PDF and DOC files, we'll extract what we can from the raw content
-     // In a production app, you'd use a proper document parsing library
-     const arrayBuffer = await file.arrayBuffer();
-     const uint8Array = new Uint8Array(arrayBuffer);
-     
-     // Try to extract readable text from the binary content
-     let text = "";
-     for (let i = 0; i < uint8Array.length; i++) {
-       const char = uint8Array[i];
-       // Only include printable ASCII characters
-       if (char >= 32 && char <= 126) {
-         text += String.fromCharCode(char);
-       } else if (char === 10 || char === 13) {
-         text += "\n";
-       }
-     }
-     
-     // Clean up the extracted text
-     text = text.replace(/[^\x20-\x7E\n]/g, " ")
-                .replace(/\s+/g, " ")
-                .trim();
-     
-     if (text.length < 50) {
-       // If we couldn't extract much text, use the filename as a hint
-       return `Academic Portfolio: ${file.name}\n\nNote: This document was uploaded for stress analysis. The system will analyze based on the document structure and any extractable content.\n\n${text}`;
-     }
-     
-     return text;
-   };
+    const extractTextContent = async (file: File): Promise<string> => {
+      // For text files, read directly
+      if (file.type === "text/plain" || file.name.endsWith(".txt")) {
+        const text = await file.text();
+        return text.substring(0, 200000); // Limit to ~200k chars
+      }
+      
+      // For PDF and DOC files, extract readable text from raw content
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      // Only process first 2MB to avoid massive garbled output
+      const maxBytes = Math.min(uint8Array.length, 2 * 1024 * 1024);
+      let text = "";
+      for (let i = 0; i < maxBytes; i++) {
+        const char = uint8Array[i];
+        if (char >= 32 && char <= 126) {
+          text += String.fromCharCode(char);
+        } else if (char === 10 || char === 13) {
+          text += "\n";
+        }
+      }
+      
+      // Clean up the extracted text
+      text = text.replace(/[^\x20-\x7E\n]/g, " ")
+                 .replace(/\s+/g, " ")
+                 .trim()
+                 .substring(0, 200000); // Limit final output
+      
+      if (text.length < 50) {
+        return `Academic Portfolio: ${file.name}\n\nNote: This document was uploaded for stress analysis. The system will analyze based on the document structure and any extractable content.\n\n${text}`;
+      }
+      
+      return text;
+    };
  
    const handleAnalyze = async () => {
      if (!file) {
