@@ -1,57 +1,21 @@
- import { useState, useCallback } from "react";
- import { motion, AnimatePresence } from "framer-motion";
- import { Upload, FileText, Loader2, Brain, AlertCircle } from "lucide-react";
- import { Button } from "@/components/ui/button";
- import { Input } from "@/components/ui/input";
- import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
- import { supabase } from "@/integrations/supabase/client";
- import { useToast } from "@/hooks/use-toast";
- import AnalysisDashboard from "./AnalysisDashboard";
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Upload, FileText, Loader2, Brain, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
  
- interface AnalysisResult {
-   id: string;
-   student_name: string | null;
-   file_name: string;
-   stress_level: "low" | "moderate" | "high";
-   stress_score: number;
-   emotional_tone: {
-     confidence: number;
-     anxiety: number;
-     motivation: number;
-     overwhelm: number;
-     primary_emotion: string;
-   };
-   workload_indicators: {
-     course_count: number;
-     assignment_density: string;
-     deadline_clustering: boolean;
-     extracurricular_load: string;
-   };
-   performance_trends: {
-     overall_trend: string;
-     strengths: string[];
-     areas_for_improvement: string[];
-   };
-   engagement_patterns: {
-     participation_level: string;
-     study_consistency: string;
-     time_management: string;
-   };
-    stress_causes: string[];
-    study_schedule: Record<string, { morning: string; afternoon: string; evening: string }>;
-    stress_tips: string[];
-    health_issues: { issue: string; description: string; severity: "mild" | "moderate" | "severe" }[];
-    analysis_summary: string;
-    created_at: string;
- }
  
- const AnalyzeTool = () => {
-   const [studentName, setStudentName] = useState("");
-   const [file, setFile] = useState<File | null>(null);
-   const [isAnalyzing, setIsAnalyzing] = useState(false);
-   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-   const [dragActive, setDragActive] = useState(false);
-   const { toast } = useToast();
+const AnalyzeTool = () => {
+  const [studentName, setStudentName] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
  
    const handleDrag = useCallback((e: React.DragEvent) => {
      e.preventDefault();
@@ -156,8 +120,7 @@
        return;
      }
  
-     setIsAnalyzing(true);
-     setAnalysisResult(null);
+      setIsAnalyzing(true);
  
      try {
        const fileContent = await extractTextContent(file);
@@ -178,11 +141,11 @@
          throw new Error(data.error);
        }
  
-       setAnalysisResult(data.analysis);
-       toast({
-         title: "Analysis Complete",
-         description: "Your portfolio has been analyzed successfully!",
-       });
+        navigate("/results", { state: { analysis: data.analysis } });
+        toast({
+          title: "Analysis Complete",
+          description: "Your portfolio has been analyzed successfully!",
+        });
      } catch (error) {
        console.error("Analysis error:", error);
        toast({
@@ -195,15 +158,10 @@
      }
    };
  
-   const handleReset = () => {
-     setFile(null);
-     setStudentName("");
-     setAnalysisResult(null);
-   };
- 
-   if (analysisResult) {
-     return <AnalysisDashboard analysis={analysisResult} onReset={handleReset} />;
-   }
+    const handleReset = () => {
+      setFile(null);
+      setStudentName("");
+    };
  
    return (
      <section id="analyze" className="py-20 bg-accent/30">
