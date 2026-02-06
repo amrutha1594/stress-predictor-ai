@@ -49,13 +49,19 @@
     - Break recommendations
     - Review sessions
  
- 9. **Stress Reduction Tips**: Provide 5-7 actionable tips tailored to the detected stress causes, including:
+9. **Stress Reduction Tips**: Provide 5-7 actionable tips tailored to the detected stress causes, including:
     - Time management strategies
     - Study techniques
     - Relaxation methods
     - Healthy academic habits
- 
- 10. **Analysis Summary**: A 2-3 sentence summary of the overall assessment.
+
+  10. **Health Issues**: Identify 3-6 potential health issues that could arise from the detected stress level and causes, such as:
+    - Physical health effects (headaches, insomnia, fatigue, muscle tension, weakened immunity)
+    - Mental health effects (anxiety disorders, depression, burnout, difficulty concentrating)
+    - Behavioral effects (social withdrawal, appetite changes, substance use risk)
+    - Each health issue should include the issue name and a brief explanation of how the student's specific stress factors could lead to it
+  
+  11. **Analysis Summary**: A 2-3 sentence summary of the overall assessment.
  
  Respond with a valid JSON object using this exact structure:
  {
@@ -94,8 +100,11 @@
      "saturday": { "morning": string, "afternoon": string, "evening": string },
      "sunday": { "morning": string, "afternoon": string, "evening": string }
    },
-   "stress_tips": string[],
-   "analysis_summary": string
+    "stress_tips": string[],
+    "health_issues": [
+      { "issue": string, "description": string, "severity": "mild" | "moderate" | "severe" }
+    ],
+    "analysis_summary": string
  }`;
  
  serve(async (req) => {
@@ -201,8 +210,9 @@
          engagement_patterns: analysis.engagement_patterns,
          stress_causes: analysis.stress_causes,
          study_schedule: analysis.study_schedule,
-         stress_tips: analysis.stress_tips,
-         analysis_summary: analysis.analysis_summary,
+          stress_tips: analysis.stress_tips,
+          health_issues: analysis.health_issues,
+          analysis_summary: analysis.analysis_summary,
        })
        .select()
        .single();

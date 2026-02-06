@@ -37,11 +37,12 @@
      study_consistency: string;
      time_management: string;
    };
-   stress_causes: string[];
-   study_schedule: Record<string, { morning: string; afternoon: string; evening: string }>;
-   stress_tips: string[];
-   analysis_summary: string;
-   created_at: string;
+    stress_causes: string[];
+    study_schedule: Record<string, { morning: string; afternoon: string; evening: string }>;
+    stress_tips: string[];
+    health_issues: { issue: string; description: string; severity: "mild" | "moderate" | "severe" }[];
+    analysis_summary: string;
+    created_at: string;
  }
  
  const AnalyzeTool = () => {

@@ -11,7 +11,8 @@
  import StressGauge from "./charts/StressGauge";
  import EmotionalToneChart from "./charts/EmotionalToneChart";
  import StudySchedule from "./StudySchedule";
- import StressTips from "./StressTips";
+import StressTips from "./StressTips";
+import HealthIssues from "./HealthIssues";
  
  interface AnalysisResult {
    id: string;
@@ -43,9 +44,10 @@
      time_management: string;
    };
    stress_causes: string[];
-   study_schedule: Record<string, { morning: string; afternoon: string; evening: string }>;
-   stress_tips: string[];
-   analysis_summary: string;
+    study_schedule: Record<string, { morning: string; afternoon: string; evening: string }>;
+    stress_tips: string[];
+    health_issues: { issue: string; description: string; severity: "mild" | "moderate" | "severe" }[];
+    analysis_summary: string;
    created_at: string;
  }
  
@@ -264,9 +266,21 @@
                </div>
              </CardContent>
            </Card>
-         </motion.div>
- 
-         {/* Tabs for Schedule and Tips */}
+          </motion.div>
+
+          {/* Health Issues */}
+          {analysis.health_issues && analysis.health_issues.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55 }}
+              className="mb-8"
+            >
+              <HealthIssues issues={analysis.health_issues} stressLevel={analysis.stress_level} />
+            </motion.div>
+          )}
+
+          {/* Tabs for Schedule and Tips */}
          <motion.div
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}

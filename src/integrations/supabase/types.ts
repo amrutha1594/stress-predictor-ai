@@ -22,6 +22,7 @@ export type Database = {
           engagement_patterns: Json | null
           file_content: string
           file_name: string
+          health_issues: Json | null
           id: string
           performance_trends: Json | null
           stress_causes: Json | null
@@ -40,6 +41,7 @@ export type Database = {
           engagement_patterns?: Json | null
           file_content: string
           file_name: string
+          health_issues?: Json | null
           id?: string
           performance_trends?: Json | null
           stress_causes?: Json | null
@@ -58,6 +60,7 @@ export type Database = {
           engagement_patterns?: Json | null
           file_content?: string
           file_name?: string
+          health_issues?: Json | null
           id?: string
           performance_trends?: Json | null
           stress_causes?: Json | null

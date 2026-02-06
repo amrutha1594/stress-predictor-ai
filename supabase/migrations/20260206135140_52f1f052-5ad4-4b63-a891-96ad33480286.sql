@@ -1,0 +1,1 @@
+ALTER TABLE public.portfolio_analyses ADD COLUMN health_issues jsonb DEFAULT '[]'::jsonb;
