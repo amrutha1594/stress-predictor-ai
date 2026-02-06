@@ -1,4 +1,4 @@
-import { Brain, GraduationCap, Heart, Mail, MapPin } from "lucide-react";
+import { Brain, GraduationCap, Heart } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -44,20 +44,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-display font-semibold text-lg mb-4">Contact</h4>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-background/80 text-sm">
-                <Mail className="w-4 h-4 text-primary" />
-                <span>project@university.edu</span>
-              </li>
-              <li className="flex items-center gap-2 text-background/80 text-sm">
-                <MapPin className="w-4 h-4 text-primary" />
-                <span>Computer Science Department</span>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Bottom Bar */}
