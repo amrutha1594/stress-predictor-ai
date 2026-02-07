@@ -1,14 +1,15 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, FileText, Loader2, Brain, AlertCircle } from "lucide-react";
+import { Upload, FileText, Loader2, Brain, AlertCircle, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
- 
- 
+import { useAuth } from "@/hooks/useAuth";
+
+
 const AnalyzeTool = () => {
   const [studentName, setStudentName] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -16,7 +17,8 @@ const AnalyzeTool = () => {
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
- 
+  const { user, session } = useAuth();
+
    const handleDrag = useCallback((e: React.DragEvent) => {
      e.preventDefault();
      e.stopPropagation();
@@ -26,7 +28,7 @@ const AnalyzeTool = () => {
        setDragActive(false);
      }
    }, []);
- 
+
    const handleDrop = useCallback((e: React.DragEvent) => {
      e.preventDefault();
      e.stopPropagation();
@@ -44,7 +46,7 @@ const AnalyzeTool = () => {
        }
      }
    }, [toast]);
- 
+
    const isValidFile = (file: File): boolean => {
      const validTypes = [
        "application/pdf",
@@ -58,7 +60,7 @@ const AnalyzeTool = () => {
             file.name.endsWith(".docx") || 
             file.name.endsWith(".txt");
    };
- 
+
    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
      if (e.target.files && e.target.files[0]) {
        const selectedFile = e.target.files[0];
@@ -73,19 +75,16 @@ const AnalyzeTool = () => {
        }
      }
    };
- 
+
     const extractTextContent = async (file: File): Promise<string> => {
-      // For text files, read directly
       if (file.type === "text/plain" || file.name.endsWith(".txt")) {
         const text = await file.text();
-        return text.substring(0, 200000); // Limit to ~200k chars
+        return text.substring(0, 200000);
       }
       
-      // For PDF and DOC files, extract readable text from raw content
       const arrayBuffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
       
-      // Only process first 2MB to avoid massive garbled output
       const maxBytes = Math.min(uint8Array.length, 2 * 1024 * 1024);
       let text = "";
       for (let i = 0; i < maxBytes; i++) {
@@ -97,11 +96,10 @@ const AnalyzeTool = () => {
         }
       }
       
-      // Clean up the extracted text
       text = text.replace(/[^\x20-\x7E\n]/g, " ")
                  .replace(/\s+/g, " ")
                  .trim()
-                 .substring(0, 200000); // Limit final output
+                 .substring(0, 200000);
       
       if (text.length < 50) {
         return `Academic Portfolio: ${file.name}\n\nNote: This document was uploaded for stress analysis. The system will analyze based on the document structure and any extractable content.\n\n${text}`;
@@ -109,7 +107,7 @@ const AnalyzeTool = () => {
       
       return text;
     };
- 
+
    const handleAnalyze = async () => {
      if (!file) {
        toast({
@@ -119,9 +117,19 @@ const AnalyzeTool = () => {
        });
        return;
      }
- 
+
+     if (!session) {
+       toast({
+         title: "Authentication required",
+         description: "Please sign in to analyze your portfolio.",
+         variant: "destructive",
+       });
+       navigate("/auth");
+       return;
+     }
+
       setIsAnalyzing(true);
- 
+
      try {
        const fileContent = await extractTextContent(file);
        
@@ -132,15 +140,15 @@ const AnalyzeTool = () => {
            studentName: studentName || undefined,
          },
        });
- 
+
        if (error) {
          throw error;
        }
- 
+
        if (data.error) {
          throw new Error(data.error);
        }
- 
+
         navigate("/results", { state: { analysis: data.analysis } });
         toast({
           title: "Analysis Complete",
@@ -157,12 +165,12 @@ const AnalyzeTool = () => {
        setIsAnalyzing(false);
      }
    };
- 
+
     const handleReset = () => {
       setFile(null);
       setStudentName("");
     };
- 
+
    return (
      <section id="analyze" className="py-20 bg-accent/30">
        <div className="container mx-auto px-4">
@@ -180,7 +188,7 @@ const AnalyzeTool = () => {
              generate personalized study schedules, and provide stress-reduction tips.
            </p>
          </motion.div>
- 
+
          <motion.div
            initial={{ opacity: 0, y: 20 }}
            whileInView={{ opacity: 1, y: 0 }}
@@ -199,6 +207,19 @@ const AnalyzeTool = () => {
                </CardDescription>
              </CardHeader>
              <CardContent className="space-y-6">
+               {!user && (
+                 <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                   <LogIn className="w-5 h-5 text-primary flex-shrink-0" />
+                   <div className="flex-1">
+                     <p className="text-sm font-medium text-foreground">Sign in required</p>
+                     <p className="text-xs text-muted-foreground">You need to sign in to analyze your portfolio.</p>
+                   </div>
+                   <Button size="sm" onClick={() => navigate("/auth")}>
+                     Sign In
+                   </Button>
+                 </div>
+               )}
+
                {/* Student Name Input */}
                <div className="space-y-2">
                  <label className="text-sm font-medium text-foreground">
@@ -211,7 +232,7 @@ const AnalyzeTool = () => {
                    className="bg-background"
                  />
                </div>
- 
+
                {/* File Upload Zone */}
                <div
                  className={`relative border-2 border-dashed rounded-xl p-8 transition-all ${
@@ -286,7 +307,7 @@ const AnalyzeTool = () => {
                    </AnimatePresence>
                  </div>
                </div>
- 
+
                {/* Info Box */}
                <div className="flex items-start gap-3 p-4 rounded-lg bg-accent/50">
                  <AlertCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
@@ -300,11 +321,11 @@ const AnalyzeTool = () => {
                    </ul>
                  </div>
                </div>
- 
+
                {/* Analyze Button */}
                <Button
                  onClick={handleAnalyze}
-                 disabled={!file || isAnalyzing}
+                 disabled={!file || isAnalyzing || !user}
                  className="w-full gradient-hero text-primary-foreground py-6 text-lg font-semibold"
                >
                  {isAnalyzing ? (
@@ -325,6 +346,6 @@ const AnalyzeTool = () => {
        </div>
      </section>
    );
- };
- 
- export default AnalyzeTool;
+};
+
+export default AnalyzeTool;
