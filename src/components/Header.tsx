@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Menu, X, Brain, GraduationCap, LogIn, LogOut } from "lucide-react";
+import { Menu, X, Brain, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
   { href: "#home", label: "Home" },
@@ -17,8 +15,6 @@ const navLinks = [
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,14 +29,6 @@ const Header = () => {
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  const handleAuthAction = async () => {
-    if (user) {
-      await signOut();
-    } else {
-      navigate("/auth");
     }
   };
 
@@ -92,24 +80,6 @@ const Header = () => {
                 {link.label}
               </a>
             ))}
-            <Button
-              variant={user ? "ghost" : "default"}
-              size="sm"
-              onClick={handleAuthAction}
-              className="ml-2"
-            >
-              {user ? (
-                <>
-                  <LogOut className="w-4 h-4 mr-1" />
-                  Sign Out
-                </>
-              ) : (
-                <>
-                  <LogIn className="w-4 h-4 mr-1" />
-                  Sign In
-                </>
-              )}
-            </Button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -151,24 +121,6 @@ const Header = () => {
                   {link.label}
                 </a>
               ))}
-              <Button
-                variant={user ? "ghost" : "default"}
-                size="sm"
-                onClick={handleAuthAction}
-                className="mt-2"
-              >
-                {user ? (
-                  <>
-                    <LogOut className="w-4 h-4 mr-1" />
-                    Sign Out
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="w-4 h-4 mr-1" />
-                    Sign In
-                  </>
-                )}
-              </Button>
             </nav>
           </motion.div>
         )}

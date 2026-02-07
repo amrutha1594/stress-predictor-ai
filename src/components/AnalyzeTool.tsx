@@ -1,13 +1,13 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, FileText, Loader2, Brain, AlertCircle, LogIn } from "lucide-react";
+import { Upload, FileText, Loader2, Brain, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+
 
 
 const AnalyzeTool = () => {
@@ -17,7 +17,7 @@ const AnalyzeTool = () => {
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, session } = useAuth();
+  
 
    const handleDrag = useCallback((e: React.DragEvent) => {
      e.preventDefault();
@@ -120,15 +120,6 @@ const AnalyzeTool = () => {
        return;
      }
 
-     if (!session) {
-       toast({
-         title: "Authentication required",
-         description: "Please sign in to analyze your portfolio.",
-         variant: "destructive",
-       });
-       navigate("/auth");
-       return;
-     }
 
       setIsAnalyzing(true);
 
@@ -209,18 +200,6 @@ const AnalyzeTool = () => {
                </CardDescription>
              </CardHeader>
              <CardContent className="space-y-6">
-               {!user && (
-                 <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                   <LogIn className="w-5 h-5 text-primary flex-shrink-0" />
-                   <div className="flex-1">
-                     <p className="text-sm font-medium text-foreground">Sign in required</p>
-                     <p className="text-xs text-muted-foreground">You need to sign in to analyze your portfolio.</p>
-                   </div>
-                   <Button size="sm" onClick={() => navigate("/auth")}>
-                     Sign In
-                   </Button>
-                 </div>
-               )}
 
                {/* Student Name Input */}
                <div className="space-y-2">
@@ -327,7 +306,7 @@ const AnalyzeTool = () => {
                {/* Analyze Button */}
                <Button
                  onClick={handleAnalyze}
-                 disabled={!file || isAnalyzing || !user}
+                 disabled={!file || isAnalyzing}
                  className="w-full gradient-hero text-primary-foreground py-6 text-lg font-semibold"
                >
                  {isAnalyzing ? (
