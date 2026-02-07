@@ -76,10 +76,12 @@ const AnalyzeTool = () => {
      }
    };
 
+    const MAX_TEXT_CHARS = 500000;
+
     const extractTextContent = async (file: File): Promise<string> => {
       if (file.type === "text/plain" || file.name.endsWith(".txt")) {
         const text = await file.text();
-        return text.substring(0, 200000);
+        return text.substring(0, MAX_TEXT_CHARS);
       }
       
       const arrayBuffer = await file.arrayBuffer();
@@ -99,7 +101,7 @@ const AnalyzeTool = () => {
       text = text.replace(/[^\x20-\x7E\n]/g, " ")
                  .replace(/\s+/g, " ")
                  .trim()
-                 .substring(0, 200000);
+                 .substring(0, MAX_TEXT_CHARS);
       
       if (text.length < 50) {
         return `Academic Portfolio: ${file.name}\n\nNote: This document was uploaded for stress analysis. The system will analyze based on the document structure and any extractable content.\n\n${text}`;
