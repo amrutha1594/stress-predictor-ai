@@ -146,7 +146,7 @@ async function checkRateLimit(
     .gte("created_at", windowStart);
 
   if (error) {
-    console.error("Rate limit check failed:", error.message);
+    console.error("Rate limit check failed");
     return false;
   }
 
@@ -281,7 +281,7 @@ serve(async (req) => {
       ? fileContent.substring(0, MAX_CONTENT_CHARS) + "\n\n[Content truncated due to length...]"
       : fileContent;
 
-    console.log(`Processing file: ${sanitizedFileName}, content length: ${fileContent.length}, user: ${userId}`);
+    console.log(`Processing analysis for user: ${userId}`);
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -314,7 +314,7 @@ serve(async (req) => {
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.error("AI Gateway error status:", aiResponse.status);
+      console.error("AI service error");
       throw new Error("AI analysis service temporarily unavailable");
     }
 
@@ -332,7 +332,7 @@ serve(async (req) => {
       const jsonStr = jsonMatch[1] || analysisContent;
       analysis = JSON.parse(jsonStr.trim());
     } catch {
-      console.error("Failed to parse AI response as JSON");
+      console.error("AI response parse error");
       throw new Error("Failed to parse AI analysis response");
     }
 
@@ -360,7 +360,7 @@ serve(async (req) => {
       .single();
 
     if (dbError) {
-      console.error("Database insert failed:", dbError.message);
+      console.error("Database insert failed");
       throw new Error("Failed to save analysis");
     }
 
@@ -369,7 +369,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("analyze-portfolio error:", error instanceof Error ? error.message : "Unknown error");
+    console.error("analyze-portfolio error");
     return new Response(
       JSON.stringify({ error: "An error occurred while analyzing the portfolio. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
