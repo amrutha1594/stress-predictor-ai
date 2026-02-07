@@ -124,8 +124,8 @@ function validateFileContent(fileContent: unknown): { valid: boolean; error?: st
   if (!fileContent || typeof fileContent !== "string") {
     return { valid: false, error: "File content is required and must be a string" };
   }
-  if (fileContent.length > 10_000_000) {
-    return { valid: false, error: "File content exceeds maximum allowed size (10MB)" };
+  if (fileContent.length > 500_000) {
+    return { valid: false, error: "File content exceeds maximum allowed size (500KB)" };
   }
   return { valid: true };
 }
@@ -275,11 +275,7 @@ serve(async (req) => {
       throw new Error("AI service is not configured");
     }
 
-    // Truncate content to avoid exceeding token limits
-    const MAX_CONTENT_CHARS = 500000;
-    const truncatedContent = fileContent.length > MAX_CONTENT_CHARS
-      ? fileContent.substring(0, MAX_CONTENT_CHARS) + "\n\n[Content truncated due to length...]"
-      : fileContent;
+    // Content is already validated to be ≤500KB by validateFileContent
 
     console.log(`Processing analysis for user: ${userId}`);
 
@@ -295,7 +291,7 @@ serve(async (req) => {
           { role: "system", content: STRESS_ANALYSIS_PROMPT },
           {
             role: "user",
-            content: `Please analyze the following student portfolio content:\n\nStudent Name: ${sanitizedStudentName || "Anonymous"}\nFile Name: ${sanitizedFileName}\n\nContent:\n${truncatedContent}`,
+            content: `Please analyze the following student portfolio content:\n\nStudent Name: ${sanitizedStudentName || "Anonymous"}\nFile Name: ${sanitizedFileName}\n\nContent:\n${fileContent}`,
           },
         ],
       }),
