@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Brain, GraduationCap } from "lucide-react";
+import { Menu, X, Brain, GraduationCap, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const navLinks = [
   { href: "#home", label: "Home" },
@@ -15,6 +17,8 @@ const navLinks = [
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +34,11 @@ const Header = () => {
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth", { replace: true });
   };
 
   return (
@@ -80,6 +89,17 @@ const Header = () => {
                 {link.label}
               </a>
             ))}
+            {user && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+                className="ml-2 text-muted-foreground hover:text-destructive"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                Sign Out
+              </Button>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -121,6 +141,14 @@ const Header = () => {
                   {link.label}
                 </a>
               ))}
+              {user && (
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-3 text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-accent/50 rounded-lg transition-colors text-left"
+                >
+                  Sign Out
+                </button>
+              )}
             </nav>
           </motion.div>
         )}

@@ -32,7 +32,7 @@ export type Database = {
           student_name: string | null
           study_schedule: Json | null
           updated_at: string
-          user_id: string | null
+          user_id: string
           workload_indicators: Json | null
         }
         Insert: {
@@ -52,7 +52,7 @@ export type Database = {
           student_name?: string | null
           study_schedule?: Json | null
           updated_at?: string
-          user_id?: string | null
+          user_id: string
           workload_indicators?: Json | null
         }
         Update: {
@@ -72,7 +72,7 @@ export type Database = {
           student_name?: string | null
           study_schedule?: Json | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
           workload_indicators?: Json | null
         }
         Relationships: []
