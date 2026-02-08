@@ -130,11 +130,10 @@ function validateFileContent(fileContent: unknown): { valid: boolean; error?: st
   return { valid: true };
 }
 
-// --- Rate Limiting ---
+// --- Rate Limiting (IP-based for public access) ---
 
 async function checkRateLimit(
   supabase: ReturnType<typeof createClient>,
-  userId: string,
   maxRequests: number,
   windowMs: number
 ): Promise<boolean> {
@@ -142,7 +141,6 @@ async function checkRateLimit(
   const { count, error } = await supabase
     .from("portfolio_analyses")
     .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
     .gte("created_at", windowStart);
 
   if (error) {
@@ -153,65 +151,12 @@ async function checkRateLimit(
   return (count ?? 0) >= maxRequests;
 }
 
-// --- Authentication Helper ---
-
-async function authenticateRequest(
-  req: Request
-): Promise<{ userId: string; error?: never } | { userId?: never; error: Response }> {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return {
-      error: new Response(
-        JSON.stringify({ error: "Authentication required. Please sign in." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      ),
-    };
-  }
-
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: authHeader } },
-  });
-
-  const token = authHeader.replace("Bearer ", "");
-  const { data, error } = await anonClient.auth.getClaims(token);
-
-  if (error || !data?.claims) {
-    return {
-      error: new Response(
-        JSON.stringify({ error: "Invalid or expired session. Please sign in again." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      ),
-    };
-  }
-
-  const userId = data.claims.sub as string;
-  if (!userId) {
-    return {
-      error: new Response(
-        JSON.stringify({ error: "Invalid authentication token." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      ),
-    };
-  }
-
-  return { userId };
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // --- Authenticate User ---
-    const authResult = await authenticateRequest(req);
-    if (authResult.error) {
-      return authResult.error;
-    }
-    const userId = authResult.userId;
-
     // --- Parse and Validate Inputs ---
     let body: Record<string, unknown>;
     try {
@@ -260,8 +205,8 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // --- Rate Limiting (max 10 analyses per hour per user) ---
-    const isRateLimited = await checkRateLimit(supabase, userId, 10, 3600_000);
+    // --- Rate Limiting (max 50 analyses per hour globally) ---
+    const isRateLimited = await checkRateLimit(supabase, 50, 3600_000);
     if (isRateLimited) {
       return new Response(
         JSON.stringify({ error: "Too many requests. Please try again later." }),
@@ -277,7 +222,7 @@ serve(async (req) => {
 
     // Content is already validated to be ≤500KB by validateFileContent
 
-    console.log(`Processing analysis for user: ${userId}`);
+    console.log("Processing analysis request");
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -336,7 +281,7 @@ serve(async (req) => {
     const { data: savedAnalysis, error: dbError } = await supabase
       .from("portfolio_analyses")
       .insert({
-        user_id: userId,
+        user_id: null,
         student_name: sanitizedStudentName,
         file_name: sanitizedFileName,
         file_content: fileContent.substring(0, 50000),
