@@ -358,7 +358,6 @@ serve(async (req) => {
     const { data: savedAnalysis, error: dbError } = await supabase
       .from("portfolio_analyses")
       .insert({
-        user_id: userId,
         student_name: sanitizedStudentName,
         file_name: sanitizedFileName,
         file_content: fileContent.substring(0, 50000),
